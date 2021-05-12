@@ -1,0 +1,137 @@
+"Breed","Classification","obey","reps_lower","reps_upper"
+"Border Collie","bright",1.57604402737974,1,4
+"Poodle","bright",1.85640810552349,1,4
+"German Shepherd","bright",1.96250000143588,1,4
+"Golden Retriever","bright",1.79815430256596,1,4
+"Doberman Pinscher","bright",1.78340124430112,1,4
+"Shetland Sheepdog","bright",1.73618265928482,1,4
+"Labrador Retriever","bright",1.91972116986952,1,4
+"Papillon","bright",1.47897579642662,1,4
+"Rottweiler","bright",1.67364076950608,1,4
+"Australian Cattle Dog","bright",1.72957602856586,1,4
+"Pembroke Welsh Corgi","intelligent",1.24329833388631,5,15
+"Miniature Schnauzer","intelligent",0.696384354391541,5,15
+"English Springer Spaniel","intelligent",0.678406595790169,5,15
+"Belgian Shepherd Dog (Tervuren)","intelligent",0.72628754281511,5,15
+"Schipperke","intelligent",0.94117319001204,5,15
+"Belgian Sheepdog","intelligent",0.781535287783286,5,15
+"Collie","intelligent",1.46055571356847,5,15
+"Keeshond","intelligent",1.21227797823217,5,15
+"German Shorthaired Pointer","intelligent",1.17258604111101,5,15
+"Flat-Coated Retriever","intelligent",1.19553870809857,5,15
+"English Cocker Spaniel","intelligent",0.767208405125564,5,15
+"Standard Schnauzer","intelligent",1.1375023562254,5,15
+"Brittany","intelligent",0.821869048186227,5,15
+"Cocker Spaniel","intelligent",0.973900076185937,5,15
+"Weimaraner","intelligent",0.935064846357939,5,15
+"Belgian Malinois","intelligent",1.48609007667662,5,15
+"Bernese Mountain Dog","intelligent",1.59056129638071,5,15
+"Pomeranian","intelligent",1.08724515197437,5,15
+"Irish Water Spaniel","intelligent",1.06669091350354,5,15
+"Vizsla","intelligent",0.943906560410333,5,15
+"Cardigan Welsh Corgi","intelligent",0.906860266150872,5,15
+"Chesapeake Bay Retriever","clever",0.702395891171615,16,25
+"Puli","clever",-0.0302277983140371,16,25
+"Yorkshire Terrier","clever",-0.0147780375336607,16,25
+"Giant Schnauzer","clever",-0.019598437631583,16,25
+"Portuguese Water Dog","clever",0.490411367501585,16,25
+"Airedale Terrier","clever",0.79313239678929,16,25
+"Bouvier des Flandres","clever",0.477226525442538,16,25
+"Border Terrier","clever",0.139814916283278,16,25
+"Briard","clever",0.70215015218207,16,25
+"Welsh Springer Spaniel","clever",0.848925183824462,16,25
+"Manchester Terrier","clever",0.0207586011039259,16,25
+"Samoyed","clever",0.303494919394131,16,25
+"Field Spaniel","clever",0.586336709187336,16,25
+"Newfoundland","clever",-0.0374352897039179,16,25
+"Australian Terrier","clever",0.661498983904416,16,25
+"American Staffordshire Terrier","clever",0.884483514308936,16,25
+"Gordon Setter","clever",0.211426893007163,16,25
+"Bearded Collie","clever",0.0853080110788058,16,25
+"Cairn Terrier","clever",0.876200836576151,16,25
+"Kerry Blue Terrier","clever",0.242120600881142,16,25
+"Irish Setter","clever",0.491565590853677,16,25
+"Norwegian Elkhound","clever",0.461991479531686,16,25
+"Affenpinscher","clever",0.861388581217177,16,25
+"Australian Silky Terrier","clever",0.380615401355993,16,25
+"Miniature Pinscher","clever",0.311259680108773,16,25
+"English Setter","clever",0.0141706854751655,16,25
+"Pharaoh Hound","clever",0.587489756594343,16,25
+"Clumber Spaniel","clever",0.0151603312440922,16,25
+"Norwich Terrier","clever",0.144129256174201,16,25
+"Dalmatian","clever",0.821337091566371,16,25
+"Soft-coated Wheaten Terrier","normal",-0.0879696526211398,26,40
+"Bedlington Terrier","normal",-0.765693114374998,26,40
+"Fox Terrier (Smooth)","normal",-0.60747025049901,26,40
+"Curly Coated Retriever","normal",-0.239976284184476,26,40
+"Irish Wolfhound","normal",-0.159976144688954,26,40
+"Kuvasz","normal",-0.0882896036003932,26,40
+"Australian Shepherd","normal",-0.39905167506303,26,40
+"Saluki","normal",-0.786272717475873,26,40
+"Finnish Spitz","normal",-0.49545238659953,26,40
+"Pointer","normal",-0.764991636053512,26,40
+"Cavalier King Charles Spaniel","normal",-0.102763986216376,26,40
+"German Wirehaired Pointer","normal",-0.969988703346847,26,40
+"Black and Tan Coonhound","normal",-0.392243324580851,26,40
+"American Water Spaniel","normal",-0.0738850786494021,26,40
+"Siberian Husky","normal",-0.891029641087223,26,40
+"Bichon Frise","normal",-0.780147563225133,26,40
+"King Charles Spaniel","normal",-0.853576364295919,26,40
+"Tibetan Spaniel","normal",-0.659131010301022,26,40
+"English Foxhound","normal",-0.676856616511555,26,40
+"Otterhound","normal",-0.91087243681188,26,40
+"Jack Russell terrier","normal",-0.0745179792403429,26,40
+"American Foxhound","normal",-0.263708363931013,26,40
+"Greyhound","normal",-0.963917759223932,26,40
+"Wirehaired Pointing Griffon","normal",-0.097873738786562,26,40
+"West Highland White Terrier","normal",-0.546864163123357,26,40
+"Havanese","normal",-0.434337491662725,26,40
+"Scottish Deerhound","normal",-0.0591083578116309,26,40
+"Boxer","normal",-0.666719415652754,26,40
+"Great Dane","normal",-0.366214613074167,26,40
+"Dachshund","normal",-0.947325780815945,26,40
+"Shiba Inu","normal",-0.159240900263052,26,40
+"Staffordshire Bull Terrier","normal",-0.110943943823183,26,40
+"Alaskan Malamute","normal",-0.0897907090304047,26,40
+"Whippet","normal",-0.278673245152804,26,40
+"Chinese Shar Pei","normal",-0.208786033249746,26,40
+"Wire Fox Terrier","normal",-0.535037542990401,26,40
+"Rhodesian Ridgeback","normal",-0.306946109141172,26,40
+"Ibizan Hound","normal",-0.154687282455332,26,40
+"Welsh Terrier","normal",-0.932869539515697,26,40
+"Irish Terrier","normal",-0.138407559880108,26,40
+"Boston Terrier","normal",-0.965013969102154,26,40
+"Akita","normal",-0.687901898924476,26,40
+"Skye Terrier","slow",-1.81575292895555,41,80
+"Norfolk Terrier","slow",-1.8332590427133,41,80
+"Sealyham Terrier","slow",-1.4523763601306,41,80
+"Pug","slow",-1.15067341227294,41,80
+"French Bulldog","slow",-1.51615931232407,41,80
+"Griffon Bruxellois","slow",-1.22295001137293,41,80
+"Maltese","slow",-1.08697655744571,41,80
+"Italian Greyhound","slow",-1.64621829090091,41,80
+"Chinese Crested","slow",-1.41128841958685,41,80
+"Dandie Dinmont Terrier","slow",-0.993258174470682,41,80
+"Petit Basset Griffon Vend̩en","slow",-1.74581534875551,41,80
+"Tibetan Terrier","slow",-1.93216439883531,41,80
+"Japanese Chin","slow",-1.65024957537223,41,80
+"Lakeland Terrier","slow",-1.46763172618364,41,80
+"Old English Sheepdog","slow",-1.91043165584665,41,80
+"Great Pyrenees","slow",-1.11270881331178,41,80
+"Scottish Terrier","slow",-1.05447776009821,41,80
+"Saint Bernard","slow",-1.05778287399182,41,80
+"Bull Terrier","slow",-1.89324986411894,41,80
+"Chihuahua","slow",-1.14806499730173,41,80
+"Lhasa Apso","slow",-1.14722176138184,41,80
+"Bullmastiff","slow",-1.40906476889108,41,80
+"Shih Tzu",NA,NA,81,100
+"Basset Hound",NA,NA,81,100
+"Mastiff",NA,NA,81,100
+"Beagle",NA,NA,81,100
+"Pekingese",NA,NA,81,100
+"Bloodhound",NA,NA,81,100
+"Borzoi",NA,NA,81,100
+"Chow Chow",NA,NA,81,100
+"Bulldog",NA,NA,81,100
+"Basenji",NA,NA,81,100
+"Afghan Hound",NA,NA,81,100
