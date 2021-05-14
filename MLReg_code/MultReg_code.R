@@ -9,7 +9,7 @@ p_load(datasets, lattice, psych, ggplot2, knitr, png, kableExtra, GGally, tidySE
 ###########################################
 # Importação e análise exploratória dos dados  
 ###########################################
-SchoolsData <- read.csv("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_data\\SchoolsData.csv")
+SchoolsData <- read.csv("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\SchoolsData.csv")
 
 ##  Estrutura geral Base de Dados (BD)  
 str(SchoolsData)
@@ -66,7 +66,6 @@ corr.student_rich  <-  cor(SchoolsData_rich[,1:4])
 corrplot(corr.student_rich, method = "number", diag = FALSE, type = "lower")
 
 ## Correlações para escolas de baixo SES    
-{r, out.width = "600px"}
 SchoolsData_poor <- subset(SchoolsData, SchoolContext=="poor neighborhood")
 corr.student_poor  <-  cor(SchoolsData_poor [,1:4])
 corrplot(corr.student_poor, method = "number", diag = FALSE, type = "lower") # CONCLUSÃO: Efeitos variáveis em função do tipo de escola**
@@ -84,13 +83,7 @@ SchoolsData$GPA.C <- scale(SchoolsData$GPA, scale = FALSE)[,]
 Reg.Model <- lm(Happiness ~ Friends.C + Quality.C + GPA.C, data = SchoolsData)
 summary(Reg.Model)$coefficients
  
-
-Para a amostra total obtemos efeitos significativos de:   
-  - Friends.C (*b* = 0.14, *p* < .001)    
-- Quality.C (*b* = 0.42, *p* < .001)  
-- GPA.C (*b* = -0.12, *p* < .001)   
-
-*Será que obtemos os mesmos resultados em todas as escolas?*
+# Será que obtemos os mesmos resultados em todas as escolas?*
 
 layout(matrix(c(1,2,3,4),2,2))
 plot(Reg.Model) # podemos avaliar visualmente a qualidade do modelo de regressão
