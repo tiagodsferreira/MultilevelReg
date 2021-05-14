@@ -13,7 +13,7 @@ Contém apresentação com conteúdos
 ## Pasta "MLReg_code"
 Ficheiro sintaxe R com código utilizado na apresentação
 
-## Pasta "R crash course-Exer"
-Contém exercício de introdução ao R
+## Pasta "MIReg_exer""R crash course-Exer"
+Contém exercício de introdução ao R ("R crash course-Exer") e exercício modelos de regressão multinível ("R_Multilevel_Exer")
 
 ### Caso se justifique acrescentarei a este arquivo outros materiais necessários ao workshop.
