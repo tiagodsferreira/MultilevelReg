@@ -13,6 +13,9 @@ SchoolsData <- read.csv("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel 
 
 ##  Estrutura geral Base de Dados (BD)  
 str(SchoolsData)
+SchoolsData[SchoolsData$SchoolID==1 , 1:4]
+library(psych)
+cor(SchoolsData[SchoolsData$SchoolID==1 , 1:4])
 
 ## Fatorização de variáveis 
 SchoolsData$SchoolContext <- as.factor(SchoolsData$SchoolContext) # transformar a variável "SchoolContext" num fator
