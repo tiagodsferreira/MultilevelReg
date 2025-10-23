@@ -1,0 +1,1176 @@
+---
+title: "Modelos de Regressão Multinível: Laboratório"
+author: "Joana Cadima & Tiago Ferreira"
+date: "Maio, 2022"
+output:
+  ioslides_presentation: 
+    widescreen: true
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+<style>
+pre {
+    line-height: 1.2em;
+    font-size: 16px;
+}
+</style>
+
+```{r, setup, include=FALSE}
+library("datasets")  
+library("lattice")
+library("psych")
+library("Hmisc")
+library("ggplot2")
+library("knitr")
+library("png")
+library("lavaan")
+library("semTools")
+library("knitr")
+library("kableExtra")
+library(semPlot)
+library(GGally)
+library(tidySEM)
+library(corrplot)
+library(effectsize)
+library(lmerTest)
+library(DiagrammeR)
+library(nlme)
+
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="medium")   # slightly smaller font for code
+```  
+
+```{r, eval=FALSE, echo=FALSE}
+######################################################################
+# Criar uma base de dados com estrutura multi-nível
+######################################################################
+
+set.seed(42) # para permitir reproduzir a mesma sequência de números aleatórios
+# Escolas high SES
+rmultilevel_r <- function(n, int, parx1, parx2, parx3) {
+  int <- rnorm(n, int, .3)
+  x1 <- rnorm(n, 5.5, 1.6) # número de amigos observados
+  x2 <- rnorm(n, 4.3, .5) # GPA observado (0:7)
+  x3 <- rnorm(n, 4.0, .2) # Qualidade da escola observada (0:7)
+  y <-  sample(int, 1) + rnorm(n=1, mean=parx1, sd=.002)*x1 + rnorm(n=1, mean=parx2, sd=.02)*x2 + rnorm(n=1, mean=parx3, sd=.02)*x3 + rnorm(n, sd=.5) # bem estar
+  return(data.frame(
+    Happiness = y,
+    Friends = x1,
+    GPA = x2,
+    Quality = x3
+  ))
+}
+
+Data.RSchool.1 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.2 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.3 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.4 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.5 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.6 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.7 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.8 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.9 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+Data.RSchool.10 <- rmultilevel_r(100, 3.4, -.14, .48, .35)
+
+rmultilevel_p <- function(n, int, parx1, parx2, parx3) {
+  int <- rnorm(n, int, .3)
+  x1 <- rnorm(n, 6, 1.6) # número de amigos observados
+  x2 <- rnorm(n, 3, .5) # GPA observado (0:7)
+  x3 <- rnorm(n, 4, .24) # Qualidade da escola observada (0:7)
+  y <-  sample(int, 1) + rnorm(n=1, mean=parx1, sd=.02)*x1 + rnorm(n=1, mean=parx2, sd=.02)*x2 + rnorm(n=1, mean=parx3, sd=.02)*x3 + rnorm(n, sd=.5)  # bem estar
+  return(data.frame(
+    Happiness = y,
+    Friends = x1,
+    GPA = x2,
+    Quality = x3
+  ))
+}
+?rnorm
+rnorm(n=1, mean=.3, sd=.05)
+
+
+
+Data.PSchool.1 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.12, parx3=.48)
+Data.PSchool.2 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.12, parx3=.48)
+Data.PSchool.3 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.32, parx3=.48)
+Data.PSchool.4 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.32, parx3=.48)
+Data.PSchool.5 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.12, parx3=.48)
+Data.PSchool.6 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.42, parx3=.48)
+Data.PSchool.7 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.42, parx3=.48)
+Data.PSchool.8 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.12, parx3=.48)
+Data.PSchool.9 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.12, parx3=.48)
+Data.PSchool.10 <- rmultilevel_p(n=160, int=2.5, parx1=.28, parx2=.52, parx3=.48)
+
+# Construir a base de dados final com os dados de todos as crianças de todas as escolas
+All.Schools.Data <-
+  rbind(
+    Data.RSchool.1,
+    Data.RSchool.2,
+    Data.RSchool.3,
+    Data.RSchool.4,
+    Data.RSchool.5,
+    Data.RSchool.6,
+    Data.RSchool.7,
+    Data.RSchool.8,
+    Data.RSchool.9,
+    Data.RSchool.10,
+    Data.PSchool.1,
+    Data.PSchool.2,
+    Data.PSchool.3,
+    Data.PSchool.4,
+    Data.PSchool.5,
+    Data.PSchool.6,
+    Data.PSchool.7,
+    Data.PSchool.8,
+    Data.PSchool.9,
+    Data.PSchool.10
+  )
+
+# Acrescentar uma variável identificadora do sujeito (StudentID)
+All.Schools.Data$StudentID <- seq(1:nrow(All.Schools.Data))
+head(All.Schools.Data)
+
+# Acrescentar uma variável identificadora da escola (SchoolID)
+All.Schools.Data$SchoolID <-
+  c(rep(1, 100),
+    rep(2, 100), 
+    rep(3, 100), 
+    rep(4, 100), 
+    rep(5, 100), 
+    rep(6, 100), 
+    rep(7, 100), 
+    rep(8, 100), 
+    rep(9, 100), 
+    rep(10, 100), 
+    rep(11, 160), 
+    rep(12, 160), 
+    rep(13, 160), 
+    rep(14, 160), 
+    rep(15, 160), 
+    rep(16, 160), 
+    rep(17, 160), 
+    rep(18, 160), 
+    rep(19, 160), 
+    rep(20, 160))
+
+# Criar um fator (SchoolContext) que identifique escolas nos dois tipos de contextos
+All.Schools.Data$SchoolContext[All.Schools.Data$SchoolID>10] <- "poor neighborhood"
+All.Schools.Data$SchoolContext[All.Schools.Data$SchoolID<11] <- "rich neighborhood"
+All.Schools.Data$SchoolContext <- as.factor(All.Schools.Data$SchoolContext)
+
+# Rounding values
+All.Schools.Data$Happiness <- round(All.Schools.Data$Happiness,2)
+All.Schools.Data$GPA <- round(All.Schools.Data$GPA,2)
+All.Schools.Data$Quality <- round(All.Schools.Data$Quality,2)
+All.Schools.Data$Friends <- round(All.Schools.Data$Friends)
+
+# Guarda base de dados em ficheiro csv (SchoolsData.csv)
+write.csv(All.Schools.Data, "G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\SchoolsData.csv", row.names=FALSE)
+```
+
+## Qual a utilidade dos modelos com Efeitos Mistos?
+### Estruturas de dados aninhados
+* Estudantes em escolas; Sujeitos em díades; Clientes em terapeutas...  
+
+### Pressuposto da independência das observações 
+* O valores de Y (VD) associados a $X_i$ (VI) não são independentes   
+* Valores de $Xi$ provavelmente correlacionados  
+* Estrutura de dependência implícita aos dados   
+
+
+## Tipos de estruturas de dados
+
+### Dados agrupados
+- Y (VD) medida uma vez por sujeito ou Unidade de Análise (UA)   
+- UA agrupadas em clusters (*Ex., peso de indivíduos de uma certa espécie em diferentes habitats*)
+
+### Dados com medidas repetidas  
+- Y é medida mais do que uma vez por UA  
+- Fator de medida repetida pode ser o tempo ou outra condição experimental (*Ex., resposta neurológica em 3 áreas cerebrais diferentes de sujeitos em 2 tratamentos*)   
+
+### Dados longitudinais  
+- Y é medida vários vezes para cada sujeito (*Ex., competências de memória de crianças aos 4, 6, 8 e 10 anos*)   
+
+
+## Tipos de estruturas de dados
+### Dados hierárquicos  
+
+```{r, out.width = "1000px", echo=FALSE}
+grViz("
+digraph SEM {
+
+graph [layout = neato,
+       overlap = true,
+       outputorder = edgesfirst]
+
+node [shape = rectangle]
+
+a [pos = '-3.8, 2!', label = 'Cluster (j=1)']
+b  [pos = '4, 2!', label = 'Cluster (j=2)']
+
+
+aa [pos = '-5.8, 1!', label = 'UA (i=1)']
+ab [pos = '-1.8, 1!', label = 'UA (i=2)']
+ba [pos = '2.2, 1!', label = 'UA (i=3)']
+bb [pos = '6.2, 1!', label = 'UA (i=4)']
+
+
+
+aaa [pos = '-7, 0!', label = 'Obs. (t=1)']
+aab [pos = '-5.8, 0!', label = 'Obs. (t=2)']
+aac [pos = '-4.6, 0!', label = 'Obs. (t=3)']
+
+aba [pos = '-3, 0!', label = 'Obs. (t=1)']
+abb [pos = '-1.8, 0!', label = 'Obs. (t=2)']
+abc [pos = '-.6, 0!', label = 'Obs. (t=3)']
+
+
+baa [pos = '1, 0!', label = 'Obs. (t=1)']
+bab [pos = '2.2, 0!', label = 'Obs. (t=2)']
+bac [pos = '3.4, 0!', label = 'Obs. (t=3)']
+
+bba [pos = '5, 0!', label = 'Obs. (t=1)']
+bbb [pos = '6.2, 0!', label = 'Obs. (t=2)']
+bbc [pos = '7.4, 0!', label = 'Obs. (t=3)']
+
+
+a -> ab
+aa -> aaa
+aa->aab
+aa->aac
+
+a -> aa
+ab -> aba
+ab -> abb
+ab -> abc
+
+
+b -> ba
+ba -> baa
+ba -> bab
+ba -> bac
+
+b -> bb
+bb -> bba
+bb -> bbb
+bb -> bbc
+
+}
+")
+
+```
+
+## Tipos de estruturas de dados
+### Dados hierárquicos  
+- Nível 1: Medidas repetidas (*t*)  
+- Nível 2: Unidade de análise / Sujeitos (*i*)   
+- Nível 3: Cluster (*j*) 
+  
+    
+$$ \large 
+y_{tij}=(\beta_{000} + b_{00j} + b_{0ij}) + (\beta_{100} + b_{10j} + b_{1ij})time_t + \nu_{tij}
+$$
+
+
+
+## Fatores Fixos e Aleatórios
+- Fatores Fixos (contexto clássico da ANOVA ou ANCOVA):
+  - Variável de classificação cujos níveis são conhecidos e do interesse do investigador  
+  - **Efeito Fixo**: Número ou coeficiente de regressão, representando a relação entre VI e VD
+
+
+- Fatores aleatórios 
+  - Variável de classificação com níveis aleatoriamente selecionados da população  
+  - Nem todos os níveis estarão representados na base de dados, no entanto, a intenção do investigador é generalizar à população   
+  - **Efeito Aleatório**: Variável aleatória que representa a variação face ao efeito fixo
+
+
+# AGENDA | Modelos multinível   
+<div class="gray2">
+- **Importação e análise exploratória dos dados**   
+- **GLM e regressão linear simples**    
+- **Regressão multinível**   
+
+</div> 
+
+# Importação e análise exploratória dos dados  
+
+## SchoolsData
+* 2600 estudantes do ensino secundário  
+* 20 escolas (10 de classe média e 10 em contextos desfavorecidos)  
+* Variável em estudo: nível de felicidade e bem-estar ("Happiness") [0-10]  
+* Variáveis explicativas: 
+    - número de amigos ("Friends") [0-11]   
+    - aproveitamento escolar ("GPA") [0-6]      
+    - qualidade da escola percecionada individualmente ("Quality") [0-6]         
+    
+```{r}
+SchoolsData <- read.csv("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\SchoolsData.csv")
+```
+
+NOTA: na base de dados as primeiras 10 escolas são de contextos normativos; a restantes estão localizadas em contextos desfavorecidos
+
+
+##  Estrutura geral Base de Dados (BD)  
+```{r}
+str(SchoolsData)
+```
+
+
+
+## Fatorização de variáveis 
+```{r}
+SchoolsData$SchoolContext <- as.factor(SchoolsData$SchoolContext) # transformar a variável "SchoolContext" num fator
+sapply(SchoolsData, class) # verificar a classe de todas as variáveis de SchoolsData
+```
+```{r}
+table(SchoolsData$SchoolContext)
+```
+
+
+
+## Estatística descritiva  
+```{r}
+library(psych)
+```
+
+```{r}
+psych::describe(SchoolsData[, -5:-7])
+```
+```{r, eval=FALSE}
+psych::describeBy(SchoolsData[, -5:-6], group="SchoolContext")
+```
+
+
+
+
+# Exploração gráfica dos dados  
+
+## Relação entre *Happiness* (VD) e *Friends* (VI)  
+
+```{r, echo=FALSE, out.width = "550px", warning=FALSE}
+db_sel_plot <-
+  SchoolsData[SchoolsData$SchoolID %in% c(sample(1:10, 3), sample(11:20, 3)),]
+
+Model.Plot.Friends <-
+  ggplot(data = db_sel_plot, aes(x = Friends, y = Happiness, group = SchoolID)) +
+  facet_grid(~ SchoolID) +
+  geom_point(aes(colour = SchoolID)) +
+  geom_smooth(method = "lm", se = TRUE, aes(colour = SchoolID)) +
+  xlab("Friends") + ylab("Happiness") +
+  theme(legend.position = "none")
+Model.Plot.Friends 
+
+```
+    
+*Efeito parece variar em função da escola. Negativo para umas escolas e positivo para outras*
+
+
+
+
+## Relação entre *Happiness* (VD) e *Quality* (VI)  
+```{r, echo=FALSE, out.width = "550px"}
+Model.Plot.Quality <-ggplot(data = db_sel_plot, aes(x =Quality, y=Happiness,group=SchoolID))+    
+  facet_grid( ~ SchoolID)+    
+  geom_point(aes(colour = SchoolID))+ 
+  geom_smooth(method = "lm", se = TRUE, aes(colour = SchoolID))+  
+  xlab("School Quality")+ylab("Happiness")+    
+  theme(legend.position = "none")   
+Model.Plot.Quality
+```
+  
+*O efeito positivo parece mais consistente nas escolas de baixo SES*  
+
+
+
+## Relação entre *GPA* (VI) e *Happiness* (VD)  
+```{r, echo=FALSE, out.width = "550px"}
+Model.Plot.GPA <-ggplot(data = db_sel_plot, aes(x =GPA, y=Happiness,group=SchoolID))+    
+  facet_grid( ~ SchoolID)+    
+  geom_point(aes(colour = SchoolID))+ 
+  geom_smooth(method = "lm", se = TRUE, aes(colour = SchoolID))+  
+  xlab("GPA")+ylab("Happiness")+    
+  theme(legend.position = "none")   
+Model.Plot.GPA
+```
+  
+*Efeito mais evidente em escolas de elevado SES*  
+
+
+
+
+## Correlações para a amostra completa     
+```{r, out.width = "550px"}
+corr.student  <-  cor(SchoolsData[,1:4])
+corrplot::corrplot(corr.student, method = "number", diag = FALSE, type = "lower")
+```
+
+
+
+## Correlações para escolas de elevado SES
+```{r, out.width = "550px"}
+SchoolsData_rich <- subset(SchoolsData, SchoolContext=="rich neighborhood")
+corr.student_rich  <-  cor(SchoolsData_rich[,1:4])
+corrplot(corr.student_rich, method = "number", diag = FALSE, type = "lower")
+```
+
+
+
+## Correlações para escolas de baixo SES    
+```{r, out.width = "550px"}
+SchoolsData_poor <- subset(SchoolsData, SchoolContext=="poor neighborhood")
+corr.student_poor  <-  cor(SchoolsData_poor [,1:4])
+corrplot(corr.student_poor, method = "number", diag = FALSE, type = "lower")
+```  
+
+**CONCLUSÃO: As relações entre variáveis parecem variar em função do contexto escolar*
+
+
+# GLM e Regressão linear Simples    
+
+## Modelo de regressão simples - SETUP
+* Abordagem analítica ignora o facto dos dados estarem organizados de forma hierárquica  
+  - Vários estudantes partilham as mesmas escolas  
+    
+* Centrar as variáveis à “grand mean” para facilitar a interpretação dos dados  
+  - Para isso, subtraímos  a média da variável ao valores individuais    
+  - Usar função "scale()" com o argumento scale = FALSE.  
+```{r}
+# ?scale
+SchoolsData$Friends.C <- scale(SchoolsData$Friends, scale = FALSE)[,] 
+# equal to SchoolsData$Friends.C <- SchoolsData$Friends - mean(SchoolsData$Friends)
+SchoolsData$Quality.C <- scale(SchoolsData$Quality, scale = FALSE)[,] 
+SchoolsData$GPA.C <- scale(SchoolsData$GPA, scale = FALSE)[,] 
+```  
+
+
+
+## Modelo de regressão simples  
+* Testar o modelo de regressão simples usando as variáveis centradas  
+  - O valor observado de zero corresponde a média da amostra   
+
+### O GLM expressa-se da seguinte forma:
+  
+$$\hat{Y_{i}} = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + ... + \beta_pX_{ip}$$
+$${Y_{i}} = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + ... + \beta_pX_{ip} + \varepsilon_{i}$$
+  
+$$\varepsilon_{i} = {Y_{i}} - \hat{Y_{i}}$$
+
+
+
+## Aplicação do GLM aos nossos dados 
+
+$$\hat{Happiness_{i}} = \beta_0 + \beta_1Friends.C_{i}  + \beta_2Quality.C_{i}  + \beta_3GPA.C_{i}$$   
+
+LEGENDA:  
+$\hat{Happiness_{i}}$ = score estimado de *illness*  
+$Friends.C_{i}$ = score de *exercise*  
+$Quality.C_{i}$ = score de *hardy*  
+$GPA.C_{i}$ = score de *fitness*  
+$\beta_0$ = valor de **Happiness** quando X1, X2 e X3 assume o valor zero  
+$\beta_1$, $\beta_2$ & $\beta_3$ = coeficientes de regressão para *Friends.C*, *Quality.C* e *GPA.C*  
+
+
+
+## Estimação OLS no R s  
+```{r}
+Reg.Model <- lm(Happiness ~ Friends.C + Quality.C + GPA.C, data = SchoolsData)
+summary(Reg.Model)$coefficients
+``` 
+
+Para a amostra total obtemos efeitos significativos de:   
+- Friends.C (*b* = 0.14, *p* < .001)    
+- Quality.C (*b* = 0.42, *p* < .001)  
+- GPA.C (*b* = -0.12, *p* < .001)   
+
+*Será que obtemos os mesmos resultados em todas as escolas?*
+
+
+## Avaliação dos pressupostos
+```{r, out.width = "600px"}
+layout(matrix(c(1,2,3,4),2,2))
+plot(Reg.Model) # podemos avaliar visualmente a qualidade do modelo de regressão
+```
+
+
+
+## Avaliação dos pressupostos  
+* Linearidade (Residuals vs Fitted)  
+Se a VD estiver ligada de forma linear com as VI não existirá uma relação sistemática entre valores estimados e resíduos. No gráfico, os resíduos devem estar distribuídos homogeneamente ao longo da linha.  
+
+* Normalidade dos resíduos (Normal Q-Q)  
+Resíduos devem seguir uma linha reta, sobrepondo-se à linha tracejada no gráfico.  
+
+* Homocedasticidade (Scale-Location)  
+Em que medida os resíduos se distribuem de forma homogénea por valores de x. O gráfico deve apresentar uma linha horizontal com os pontos distribuídos de forma aparentemente aleatória.  
+
+* Outliers (Residuals vs Leverage)  
+Existem outliers? Estes casos surgirão fora da distância de Cook marcada a tracejado no gráfico.  
+
+
+
+## Estimação OLS do modelo para escolas de elevado SES  
+**A função subset () permite selecionar os casos pretendidos**
+```{r}
+Reg.Model_rich <- lm(Happiness ~ Friends.C + Quality.C + GPA.C, 
+                     data = subset(SchoolsData, SchoolContext=="rich neighborhood"))
+
+summary(Reg.Model_rich)$coefficients
+```
+
+**NOTA: O efeito de Friends.C passa a negativo, enquanto que o de Quality.C é atenuado**
+
+
+
+## Estimação OLS do modelo para escolas de baixo SES 
+```{r}
+Reg.Model_poor <- lm(Happiness ~ Friends.C + Quality.C + GPA.C, 
+                     data = subset(SchoolsData, SchoolContext=="poor neighborhood"))
+summary(Reg.Model_poor)$coefficients
+```  
+*Nota: todos os efeitos são significativos no sentido positivo*
+
+
+## Distribuição dos coeficientes nas escolas (n=20)
+
+```{r, warning=FALSE}
+coef <- nlme::lmList(Happiness ~ Friends.C + Quality.C + GPA.C | SchoolID, data = SchoolsData)
+```
+
+
+```{r, echo=FALSE, out.width = "600px"}
+#intercept
+par(mfrow = c(2,2))
+hist(
+  summary(coef)$coefficients[, 1, 1],
+  xlab = "Estimates for Beta 0 (intercept)",
+  col = "steelblue",
+  main = "Histogram for coeficients"
+)
+
+#Friends.C
+hist(
+  summary(coef)$coefficients[, 1, 2],
+  xlab = "Estimates for Beta 1 (Friends.C)",
+  col = "steelblue",
+  main = "Histogram for coeficients"
+)
+
+#Quality.C
+
+hist(
+  summary(coef)$coefficients[, 1, 3],
+  xlab = "Estimates for Beta 2 (Quality.C)",
+  col = "steelblue",
+  main = "Histogram for coeficients"
+)
+
+#GPA.C
+
+hist(
+  summary(coef)$coefficients[, 1, 4],
+  xlab = "Estimates for Beta 3 (GPA.C)",
+  col = "steelblue",
+  main = "Histogram for coeficients"
+)
+     
+```
+
+
+## Estimação OLS - GPA e Happiness
+```{r, out.width = "500px"}
+ggplot(SchoolsData, aes(x=GPA.C, y=Happiness)) +
+  geom_point() +
+  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+```
+
+## Estimação OLS - GPA e Happiness
+```{r, out.width = "500px"}
+ggplot(SchoolsData, aes(x=GPA.C, y=Happiness, shape=SchoolContext, color=SchoolContext)) +
+  geom_point() +
+  geom_smooth(method=lm, se=FALSE, fullrange=TRUE)
+```
+
+
+
+## Modelo de regressão simples - conclusão  
+### Os resultados da regressão OLS não consideram a estrutura aninhada dos dados  
+### Conclusões potencialmente erradas:  
+* Pressuposto da dependência dos dados é violado  
+* Crianças na mesma escola terão scores mais correlacionados       
+* A inflação das correlações dentro do grupo/escola (within-group correlation)   
+  - Estimação inapropriada dos erros das estimativas   
+  - Aumento da probabilidade do **erro tipo 1** 
+
+
+
+# Regressão multinível  
+
+
+
+## Regressão simples Vs. multinível  
+* Os modelos multinível distinguem variância dentro ("within-group") de variância entre grupos ("between-group")   
+
+* Na regressão simples este dois tipos de variâncias são combinados num único **parâmetro** ($\varepsilon_{i}$)  
+  
+$${y_{i}} = \beta_{0} + \beta_{1}x_{i} + \varepsilon_{i}$$
+LEGENDA:  
+  *i* = indivíduos; ${y_{i}}$ = score do indivíduo *i* na variável *y*;  
+  $x_{i}$ = variável independente; $\beta_{0}$ = intercept, valor de ${y}$ quando $x$ toma o zero;  
+  $\beta_{1i}$ = a slope que define a relação entre $x$ e ${y}$;  
+  $\varepsilon_{i}$ = resíduo aleatório associado aos score do indivíduo *i* (i.e., ${Y_{i}} - \hat{Y_{i}}$);
+
+
+
+## Efeitos "within-group" e "between-group"     
+$${y_{i}} = \beta_{0} + \beta_{1}x_{i} + \varepsilon_{i}$$
+
+```{r, out.width = "450px", echo = FALSE}
+knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\1_singlelevel.JPG")
+```
+
+
+
+## Efeitos "within-group" e "between-group"   
+### Quando as observações não são independentes, **poderão** existir nos diferentes grupos:  
+  * diferentes médias (intercepts, x=0)    
+  * diferentes relações entre x e y (slope)   
+
+    - *O modelo de regressão simples apenas será suficiente (i.e., correto) quando não existe efeito do grupo ("between-group") * 
+  
+**Então, como podemos estimar o efeito do grupo?**
+
+
+
+## Modelo Nulo e ICC (Intraclass Correlation)  
+### Será realmente necessário adotar uma abordagem multinível?
+* Testar o modelo multinível mais simples - **MODELO NULO**     
+  - Avalia o efeito médio do contexto sobre a VD (i.e., *Happiness*)
+  - Modelo sem VI's  
+
+*Nível 1*   
+
+$${y_{ij}} = \beta_{0j} + \varepsilon_{ij}$$
+*Nível 2* 
+
+$$\beta_{0j} = \gamma_{00} + U_{0j}$$
+
+## Modelo nulo - decomposição da variância  
+*  O modelo nulo permite apenas estimar variâncias *between-* e *within-group* 
+
+$${y_{ij}} = \gamma_{00} + U_{0j} + \varepsilon_{ij}$$
+LEGENDA:  
+*i* = unidade de nível 1;  *j* = unidade de nível 2;   
+${y_{ij}}$ = score do indivíduo *i* no grupo *j* na variável *y*;   
+$\gamma_{00}$ = intercept médio constante para todos indivíduos *i* (*fixed effect*);    
+$U_{0j}$ = efeito específico do grupo *j* no intercept (*random effect*) OU variância devida ao grupo (*between-group*);    
+$\varepsilon_{ij}$ = resíduo aleatório associado aos score do indivíduo *i* (*within-group*).  
+
+
+
+## Modelo nulo - decomposição da variância  
+$${y_{ij}} = \gamma_{00} + U_{0j} + \varepsilon_{ij}$$
+```{r, out.width = "500px", echo = FALSE}
+knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\nullmodel.JPG")
+```
+
+
+
+## O Intraclass Correlation (ICC)  
+### Representa efeito do cluster nos scores da VD  
+  * Medida da quantidade de variância da VD explicada pelo nível 2 do modelo
+  * Correlação média nos scores da VD entre indivíduos no mesmo grupo
+  * ICC diferente de 0 justifica a adoção de modelos multinível? 
+
+$$\rho = \frac{\tau^{2}}{\tau^{2} + \sigma^{2}}$$
+LEGENDA:  
+$\rho$ = ICC; 
+$\tau^{2}$ = variância *between-group* ($U_{0j}$ na equação); 
+$\sigma^{2}$ = variância *within-group* ($\varepsilon_{ij}$ na equação).
+
+
+
+## Cálculo do ICC no R  
+### Recorremos ao pacote lme4 no R para estimar modelos multinível no R   
+```{r}
+library(lme4) # se necessário: install.packages("lme4")
+head(SchoolsData, 3)
+```  
+
+
+
+## Cálculo do ICC no R  
+```{r}
+Null <- lmer(Happiness ~ 1 # define “Happinesss” em função do intercept (fixed effect)
+             + (1|SchoolID), # e que cada escola tem o seu intercept (random effect)
+             data=SchoolsData) # base de dados
+``` 
+
+Fórmula do modelo:  
+- VD antes do operador "~";       
+- VI após "~";      
+- Efeitos fixos (fixed-effects) imediatamente após "~";      
+- **1** representa o intercept;   
+- Efeitos aleatórios (random-effects) entre parêntesis;    
+  - O modelo dos random effects é definido antes do operador "|";   
+- A variável que representa o cluster (nível 2) na BD surge depois de "|";   
+- O argumento “data” identifica a base de dados.    
+
+
+ 
+## Cálculo do ICC no R  
+```{r}
+summary(Null)
+```   
+
+
+
+## Cálculo do ICC no R  
+O sumário do modelo nulo permite extrair as duas componentes de variância: 
+* *between-group* ($\tau^{2}$) e *within-group* ($\sigma^{2}$)  
+  
+Estes valores surgem no modelo na parte dedicada aos random effects   
+  $\tau^{2}$ = 0.3212  
+  $\sigma^{2}$ = 0.4446  
+   
+Podemos usar estes valores para calcular o ICC
+
+
+
+## Cálculo do ICC no R    
+A função VarCorr() permite extrair as componentes de variância estimadas pelo modelo    
+```{r}
+vc <- VarCorr(Null) 
+```
+
+Utilizamos a função print() para visualizar essas componentes de variância  
+```{r}
+print(vc, comp=c("Variance", "Std.Dev"))
+```  
+
+
+
+
+## Cálculo do ICC no R   
+Criamos agora um objeto de dados apenas com as variâncias...  
+```{r}
+vc <- as.data.frame(vc)[,c("grp", "vcov")]
+```  
+
+...e calculamos o ICC:
+```{r}
+vc[1,2]
+vc[,2]
+(ICC <- vc[1,2]/sum(vc[,2]))
+```  
+
+
+
+## Cálculo do ICC no R  
+Podemos guardar numa função para futura utilização
+```{r}
+ICC_user <- function(nome.modelo) {
+  vc <- VarCorr(nome.modelo) 
+  vc <- print(vc, comp=c("Variance", "Std.Dev"))
+  vc <- as.data.frame(vc)[,c("grp", "vcov")]
+  ICC <- vc[1,2]/sum(vc[,2])
+  return(c(ICC = ICC))
+}
+
+```  
+```{r}
+ICC_user(Null)
+```  
+
+
+
+## Cálculo do ICC no R  
+Ainda um pouco mais simples com a função *performance::icc()*
+```{r}
+# se necesssário, install.packages("performance")
+library(performance)
+icc(Null)
+```  
+
+
+## Quão baixo deve ser o ICC para se "evitar" a abordagem multinível? 
+Mesmo ICC's baixos podem levar a estimativas enviesadas   
+
+### O efeito do design (DEFF; Kish, 1965)  
+* Rácio da variância de grupo observada ($\rho$) com a variância esperada numa amostra independente (não agrupada) 
+
+$$DEFF = 1 + (nc - 1) * \rho$$
+LEGENDA: $\rho$ = ICC; $nc$ = tamanho médio do cluster; 
+
+**DEFF = 1 indica ausência de efeito de cluster**  
+* Assim **$\rho$ = 0**  OU **$nc$ = 1** são necessários para que DEFF = 1  
+* Logo, não é apenas o ICC que deve ser considerado  
+* DEFF < 2 visto como valor de referência (Lai & Kwok, 2015)   
+
+
+
+
+## Random Intercept Model com preditor de nível 1   
+$$y_{i} = \gamma_{00} + \beta_{1j}x + U_{0j} + \varepsilon_{i}$$
+```{r, out.width = "500px", echo = FALSE}
+knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\2_randointercept.JPG")
+```
+
+
+
+## Random Intercept Model com preditor de nível 1   
+Este modelo consiste numa extensão do modelo nulo, incluindo um preditor de nível 1 (i.e., estudante)  
+  - Especifica o efeito de *GPA* (fixed effect) sobre *Happiness* e considera-se a variação do intercept ao nível da escola (random effect)   
+  
+*Este modelo pode ser representado pela seguinte equação:*  
+
+$$Happiness_{i} = \gamma_{00} + \beta_{1j}GPA + U_{0j} + \varepsilon_{i}$$
+**Fixed effects:**    
+$\gamma_{00}$ = intercept do modelo  
+$\beta_{1j}GPA$ = Efeito médio de GPA sobre happiness   
+**Random effects:**    
+$U_{0j}$ = variância específica do grupo  
+$\varepsilon_{i}$ = variáncia individual    
+
+
+
+## Random Intercept Model com preditor de nível 1  
+Ajustamento do modelo no R  
+```{r}
+Model.1 <- lmer(Happiness ~ GPA.C + (1 | SchoolID), data=SchoolsData)
+```  
+A sintaxe especifica que:   
+
+- O score de "Happiness" é predito pela variável "GPA" (fixed effect)   
+- A parte aleatória do modelo (random intercept) e a identificação do cluster (dentro de parêntesis)   
+- "(1 | SchoolID)" indica que apenas iremos considerar a variação do intercept (random intercept model)  
+
+
+## Random Intercept Model com preditor de nível 1  
+
+O sumário do modelo apresenta os efeitos fixos e desvios padrão (efeitos aleatórios). 
+```{r}
+summary(Model.1)
+```
+
+## Efeitos fixos
+```{r}
+summary(Model.1)$coefficients
+```
+* O intercept fixo (i.e., intercept "médio") é de **6.45**  
+  - Representando a média de happiness quando o GPA é 0  
+  - Notar que GPA está centrado à média (logo, 0 corresponde ao valor médio de GPA)  
+
+* GPA tem um efeito positivo (*p* < .001) em Happiness    
+  - Assim, *quando controlando as flutuações média dos scores de Happiness nas diferentes escolas*, a um aumento de GPA de 1 ponto está associado um aumento médio de cerca .35 pontos de Happiness  
+
+
+## Efeitos aleatórios
+```{r}
+summary(Model.1)$varcor
+```
+
+* Depois de considerar o efeito de GPA em happiness, o desvio padrão nos intercepts entre escolas (*between-group*) é de 0.73 (ligeiramente diferente do valor correspondente no modelo nulo, 0.57)  
+* O desvio padrão dos scores de happiness dos indivíduos dentro das escolas (*within-group*) é de 0.64 (no modelo nulo, 0.67)
+
+
+## Random Intercept Model com preditor de nível 1
+Podemos ainda comparar o ajustamento do modelo 1 relativamente ao modelo nulo, apenas com o intercept aleatório.  
+
+```{r}
+anova(Null, Model.1)
+```  
+Os valores de AIC e BIC são ligeiramente inferiores no Model.1, o que sugere um melhor ajustamento face ao modelo nulo
+
+##  Pesos de regressão standardizados
+
+```{r}
+# library(effectsize)
+standardize(Model.1) # pré
+standardize_parameters(Model.1) # pós
+```
+
+
+## Random Intercept Model com preditor de nível 1
+Finalmente, calculamos a variância explicada (r2) pelo modelo através da função r.squaredGLMM() do pacote MuMIn  
+```{r}
+# install.packages("MuMIn")
+library(MuMIn)
+r.squaredGLMM(Model.1, null=Null)
+```
+*NOTA: R2m consiste na variância explicada apenas pelos fixed effects, enquanto que o indicador R2c representa a variância explicada pela totalidade do modelo, considerando tanto os fixed como os random effects*
+
+
+# Duas notas   
+<div class="gray2">
+- **Cálculo do valores de *p* (significância)**   
+- **Métodos de estimação**    
+
+
+
+
+## Os valores de *p* (significância)  
+* Existem vários métodos para calcular os valores de *p* em modelos multinível  
+  - Diferentes programas estatísticos adotam diferentes métodos:  
+    - HLM recurso à distribuição t  
+    - SAS e SPSS utilizam a aproximação de Satterthwaite  
+    - Aproximação Kenward-Roger disponível em algumas aplicações, nomeadamente no R
+
+POR NORMA, estes métodos produzem resultados muito aproximados  
+
+
+
+## Os valores de *p* (significância)  
+* No R, é necessário recorrer ao pacote lmerTest para obter os valores de p  
+    - Este pacote permite, através do argumento ddf, utilizar vários métodos para calcular os valores de p  
+```{r, eval=FALSE}
+# se necessário install.packages("lmerTest")
+library(lmerTest)
+# ?lmerTest::lmer
+summary(Model.1, ddf = "lme4")
+summary(Model.1, ddf = "Satterthwaite")
+summary(Model.1, ddf = "Kenward-Roger")
+```
+  
+
+
+## Métodos de estimação  
+Ao contrário da regressão tradicional o método de estimação por OLS não é o mais adequado em modelos multinível  
+As abordagens mais usuais são:    
+- Maximum Likelihood Estimation (MLE)    
+- Restricted Maximum Likelihood (REML)  
+
+Estes dois métodos diferem na fórmula de calcular os graus de liberdade para estimação das variâncias   
+- Ao contrário do MLE, o REML tem em conta o número de parâmetros estimados pelo modelo quando determina os graus de liberdade    
+- O MLE não tem isto em conta, podendo resultar na subestimação das variâncias  
+
+
+
+## Random Intercept Model com preditores (L1 e L2)  
+Apresentamos de seguida um modelo com os fixed effects de variáveis do nível 1 (aluno) e 2 (escola)   
+
+Começamos por criar e incluir na nossa base de dados um preditor de nível 2 ("SchoolAveQuality")    
+  - Qualidade média da escola percecionada pelos seus alunos     
+```{r}
+head(SchoolsData,3)
+AveQual <- with(SchoolsData, tapply(Quality, SchoolID, mean))
+SchoolsData$SchoolAveQuality <- AveQual[SchoolsData$SchoolID]
+```
+
+
+
+## Random Intercept Model com preditores (L1 e L2)   
+* 3 preditores de nível 1: GPA, número de amigos e qualidade percecionada individualmente pelos alunos  
+* 1 preditor de nível 2, qualidade média da escola  
+
+Serão apenas estimados os fixed effects destes preditores  
+
+```{r}
+Model.2 <- lmer(Happiness ~ GPA.C + Friends.C + Quality.C + SchoolAveQuality + (1 | SchoolID), data=SchoolsData)
+```
+Tal como os preditores de nível 1, o preditor de nível 2, "SchoolAveQuality" é incluído como fixed effect, não sendo incluída qualquer componente aleatória (random effect). Apresenta por isso um efeito fixo (médio) que é comum a todas as escolas. 
+
+
+
+## Random Intercept Model com preditores (L1 e L2)     
+```{r, eval=FALSE}
+summary(Model.2, ddf = "Satterthwaite") 
+```  
+
+```{r}
+summary(Model.2, ddf = "Satterthwaite")$coefficients
+```
+* Todas as variáveis de nível 1 apresentam efeitos significativos sobre “Happiness”  
+* Pelo contrário, a qualidade média das escolas (preditor de nível 2) não tem um efeito significativo sobre a VD
+
+
+
+## Random Intercept Model com preditores (L1 e L2)      
+### Incremento na variância explicada face ao modelo 1   
+```{r}
+# ?r.squaredGLMM 
+r.squaredGLMM(Model.2, null=Null)
+r.squaredGLMM(Model.1, null=Null)
+```
+
+
+## Random Intercept Model com preditores (L1 e L2)   
+### Comparação do ajustamento dos modelos   
+```{r}
+anova(Null, Model.1, Model.2)
+```
+
+
+
+
+## Random Intercept and slope Model  
+
+Este modelo acrescenta uma slope aleatória ao modelo anterior com intercept aleatório   
+  - considera-se a variação intercept (random effect) associado à escola   
+  - considera-se a variação no efeito entre as VI's e VD associado à escola  
+
+Nivel 1: 
+$$y_{ij} = \beta_{0j} + \beta_{1j}x + \varepsilon_{ij}$$
+
+Nivel 2: 
+$$\beta_{0j} = \gamma_{00} + U_{0j}$$  
+
+$$\beta_{1j} = \gamma_{10}x_{ij} + U_{1j}x_{ij}$$
+
+
+## Random Intercept and slope Model   
+### Equação completa do modelo   
+
+$$y_{ij} = \gamma_{00} + \gamma_{10}x_{ij} + U_{0j} + U_{1j}x_{ij} + \varepsilon_{ij}$$
+LEGENDA:  
+*i* = unidade de nível 1;  *j* = unidade de nível 2;  
+${y_{ij}}$ = score do indivíduo *i* no grupo *j* na variável *y*; 
+$\gamma_{00}$ = intercept médio, constante para todos indivíduos *i* (*fixed effect*);  
+$\gamma_{10}x_{ij}$ = slope média, constante para todos indivíduos *i* (*fixed effect*);  
+$U_{0j}$ = efeito específico do grupo *j* no intercept (*random effect*); 
+$U_{1j}x_{ij}$ = efeito específico do grupo *j* na slope (*random effect*); 
+$\varepsilon_{ij}$ = resíduo aleatório associado aos score do indivíduo *i* (*within-group*).  
+
+
+## Random Intercept and slope Model  
+$$y_{ij} = \gamma_{00} + \gamma_{10}x_{ij} + U_{0j} + U_{1j}x_{ij} + \varepsilon_{ij}$$
+```{r, out.width = "500px", echo = FALSE}
+knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\3_randointerceptslope.JPG")
+```
+
+
+
+## Random Intercept and slope Model 
+O modelo seguinte, para além do intercept, especifica como aleatório o efeito de *Friends* em *Happiness*  
+- Assume que a relação entre número de amigos e felicidade pode mudar de escola para escola   
+- Mantemos os efeitos de GPA e Quality como fixed effects   
+```{r}
+Model.3 <- lmer(Happiness ~ GPA.C + Friends.C + Quality.C + 
+                  (1 + Friends.C | SchoolID), data = SchoolsData)
+```  
+
+```{r, eval=F}
+summary(Model.3)
+```
+
+## Efeitos fixos
+```{r}
+summary(Model.3)$coefficients
+```
+
+* Os resultados sugerem que o número de amigos não tem um efeito significativo sobre a felicidade quando controlado o efeito de escola    
+  - i.e., não existe um efeito significativo entre “Friends” e “Happiness” que possa ser generalizado a todas escolas  
+
+
+## Efeitos aleatórios
+```{r}
+summary(Model.3)$varcor
+```
+* Cada escola tem o seu intercept e o efeito do número de amigos também pode variar em função da escola  
+* Os resultados permitem descrever as estimativas para a variância do intercept (random), variância da slope (random), bem como as correlações entre estas random intercept e slope   
+
+
+## Random Intercept and slope Model 
+
+Podemos acrescentar ao modelo os random effects para as restantes variáveis de nível 1.   
+```{r}
+Model.4 <- lmer(Happiness ~  GPA.C + Quality.C + Friends.C + 
+                  (1 + GPA.C + Quality.C + Friends.C | SchoolID), data = SchoolsData)
+
+```  
+
+Agora, a cada uma das escolas está associado um intercept bem como diferentes slopes para “GPA”, “Quality” e “Friends”.  
+```{r, eval=FALSE}
+summary(Model.4)
+```
+
+
+
+## Random Intercept and slope Model 
+A função ranova() pode-nos ajudar a melhorar o modelo  
+  Permite verificar o efeito da retirada de cada um dos random effects do modelo  
+
+```{r}
+# library(lmerTest)
+ranova(Model.4) 
+```  
+
+## Random Intercept and slope Model 
+Os resultados indicam que a eliminação do random effect de Quality não se traduz em alterações significativas do modelo  
+- Resultados indicam que o efeito fixo de Quality sobre a Happiness é semelhante entre as várias escolas da amostra. 
+
+Testamos o novo modelo agora sem os random effects para GPA e Quality.   
+```{r}
+Model.5 <- lmer(Happiness ~ GPA.C + Quality.C + Friends.C + 
+                  (1 + Friends.C | SchoolID), data = SchoolsData)
+```  
+
+```{r, eval=FALSE}
+summary(Model.5)
+```
+
+
+# Conclusão  
+
+## OLS Vs. Multinível  
+Os resultados anteriores salientam a importância de uma abordagem multinível para lidar com dados agrupados   
+
+* Isto fica claro se compararmos os resultados com os resultados obtidos pela regressão OLS  
+```{r}
+Model2_SR <- lm(Happiness ~ Friends.C, data = SchoolsData)
+summary(Model2_SR)$coefficients
+```  
+Pelo método clássico verificamos um efeito significativo de "Friends" sobre *Happiness* (*b* = 0.15, *p* < .001). 
+
+## OLS Vs. Multinível  
+
+```{r}
+Model.8 <- lmer(Happiness ~ Friends.C + 
+                  (1 + Friends.C | SchoolID), data = SchoolsData)
+summary(Model.8)$coefficients
+```  
+
+No entanto, se considerarmos no modelo o fato de estarmos perante uma estrutura aninhada dos dados, o mesmo efeito deixa de ser significativo (*p* = .116)
+
+
+## OLS Vs. Multinível  
+* Como sabemos, o efeito do número de amigos na felicidade varia em função das características das escolas
+
+```{r}
+Model.8 <- lmer(Happiness ~ Friends.C + SchoolContext + Friends.C*SchoolContext +
+                  (1 | SchoolID), data = SchoolsData)
+```
+```{r,eval=FALSE}
+summary(Model.8)
+```
+
+## OLS Vs. Multinível  
+```{r, out.width = "600px", warning = FALSE}
+library(interactions)
+probe_interaction(Model.8, Friends.C, SchoolContext)$interactplot
+```  
+
+
+# Laboratório
+
+## Joop Hox, Mirjam Moerbeek, Rens van de Schoot   
+[Multilevel Analysis: Techniques and Applications](https://www.taylorfrancis.com/books/mono/10.4324/9781315650982/multilevel-analysis-joop-hox-mirjam-moerbeek-rens-van-de-schoot)
+
+
+```{r, out.width = "200px", echo = FALSE}
+knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\Multilevel_Hox.jpg")
+```
+
+
+## Proposta de trabalho  
+- Selecionar uma das bases de dados de:
+  [Multilevel Analysis: Techniques and Applications]("https://multilevel-analysis.sites.uu.nl/datasets/")
+
+### Para a base de dados selecionada:  
+  1. importar os dados para R e fazer ajustes necessários;  
+  2. análise exploratória e visualização dos dados; 
+  3. definir uma questão de investigação tendo em conta dos dados disponíveis;  
+  4. selecionar e aplicar a melhor estratégia de modelação para responder à questão de investigação. 

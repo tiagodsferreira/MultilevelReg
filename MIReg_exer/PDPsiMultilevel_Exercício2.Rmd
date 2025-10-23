@@ -1,0 +1,45 @@
+---
+title: "Modelos de Regressão Multinível: Laboratório"
+author: "Joana Cadima & Tiago Ferreira"
+date: "Maio, 2022"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r, setup, include=FALSE}
+library("psych")   # Load additional packages here 
+library("datasets")  
+library("lattice")
+library("psych")
+library("Hmisc")
+library("ggplot2")
+
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+```  
+**EXERCÍCIO 2**  
+A base de dados "popular" foi retirada do livro *Multilevel Analysis Techniques and Applications* (Hox, 2010) e contem características de estudantes em diferentes turmas. A nossa variável de interesse neste exercício será o estatuto sociométrico (*popular*) dos alunos. Procuraremos explicar esta variável em função dos níveis individuais de extroversão (*extrav*), sexo (*sex*) e dos anos de experiência pedagógica do professor (“texp”). Alguns dos exercícios propostos de seguida foram retirados de um tutorial criado por Laurent Smeets e Rens van de Schoot e pode ser encontrado no seguinte [aqui](https://www.rensvandeschoot.com/tutorials/lme4/).   
+
+
+1. Importar para o R a base de dados (BD) do ficheiro spss (.sav) ou texto (.csv). Para importar do spss recorra à função foreign::read.spss.  
+  
+2. Verificar as dimensões da BD e visualizar alguns dos seus dados.     
+  
+3. Inspecionar a classe das variáveis e sumariar essas mesmas variáveis.  
+  
+4. Utilizar a função plot() para visualizar a relação entre as variáveis extroversão (*extrav*) e popularidade (*popular*).  
+  
+5. Testar um modelo de regressão simples, explicando popularidade (*popular*) em função de extroversão (*extrav*). O que é que os resultados sugerem?  
+  
+6. Verificar se existe um efeito da turma sobre os scores de popularidade dos alunos. Para o efeito, calcular o ICC. Em que medida considera necessário adotar uma abordagem de análise multi-nível?   
+  
+7. Examinar os efeitos fixos de sexo (*sex*; 0=rapaz, 1=rapariga) e experiência do professor (*texp*) sobre popularidade, controlado o impacto da turma no valor médios de popularidade dos alunos. Se considerar útil, poderá centrar as variáveis preditivas. Reportar os valores de R2 e *p* utilizando o ajustamento de Satterthwaite.  
+  
+8. Adicionar ao modelo anterior o efeito fixo de extroversão no nível 1 (*extrav*). Compare este modelo com o modelo anterior e interprete os resultados.  
+  
+9. Incluir os random effects das variáveis de nível 1. O que sugerem estes novos resultados? 
+
+10. Recorrer à função lmerTest::ranova() para perceber se faz sentido conduzir alguma re-especificação do modelo anterior. Se sim, testar o novo modelo e comparar com o modelo anterior. O que se pode concluir?

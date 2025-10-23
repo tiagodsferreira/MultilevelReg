@@ -1,0 +1,134 @@
+---
+title: "Modelos de Regressão Multinível: Laboratório"
+author: "Joana Cadima & Tiago Ferreira"
+date: "Maio, 2022"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r, setup, include=FALSE}
+library("psych")   # Load additional packages here 
+library("datasets")  
+library("lattice")
+library("psych")
+library("Hmisc")
+library("ggplot2")
+
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+```  
+**EXERCÍCIO 2**  
+A base de dados "popular" foi retirada do livro *Multilevel Analysis Techniques and Applications* (Hox, 2010) e contem características de estudantes em diferentes turmas. A nossa variável de interesse neste exercício será o estatuto sociométrico (*popular*) dos alunos. Procuraremos explicar esta variável em função dos níveis individuais de extroversão (*extrav*), sexo (*sex*) e dos anos de experiência pedagógica do professor (“texp”). Alguns dos exercícios propostos de seguida foram retirados de um tutorial criado por Laurent Smeets e Rens van de Schoot e pode ser encontrado no seguinte [aqui](https://www.rensvandeschoot.com/tutorials/lme4/).   
+
+
+1. Importar para o R a base de dados (BD) do ficheiro spss (.sav) ou texto (.csv). Para importar do spss recorra à função foreign::read.spss.  
+```{r}
+if(!require("foreign")) install.packages("foreign")  # instalar o pacote se necessário
+DF_POPULAR <- read.spss("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\popular.sav", to.data.frame = TRUE)
+
+DF_POPULAR <-
+  read.csv2(
+    "G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\popular.csv",
+    fileEncoding="UTF-8-BOM")
+
+```
+
+2. Verificar as dimensões da BD e visualizar alguns dos seus dados.     
+```{r}
+dim(DF_POPULAR)
+head(DF_POPULAR) 
+
+```
+
+3. Inspecionar a classe das variáveis e sumariar essas mesmas variáveis.  
+```{r}
+str(DF_POPULAR)
+summary(DF_POPULAR)
+```
+
+
+4. Utilizar a função plot() para visualizar a relação entre as variáveis extroversão (*extrav*) e popularidade (*popular*).  
+```{r}
+plot(DF_POPULAR$extrav, DF_POPULAR$popular)
+```
+
+5. Testar um modelo de regressão simples, explicando popularidade (*popular*) em função de extroversão (*extrav*). O que é que os resultados sugerem?  
+```{r}
+model1 <- lm(popular ~ extrav, data = DF_POPULAR) 
+summary(model1)
+```
+
+  
+6. Verificar se existe um efeito da turma sobre os scores de popularidade dos alunos. Para o efeito, calcular o ICC. Em que medida considera necessário adotar uma abordagem de análise multi-nível?   
+```{r}
+if(!require("lme4")) install.packages("lme4") # instalar o pacote se necessário
+null <- lmer(popular  ~ 1 # define “popular” em função do intercept (fixed effect)
+             + (1|class), # e que cada turma tem o seu intercept (random effect)
+             data=DF_POPULAR)
+summary(null)
+
+ICC <- 0.7021/(0.7021+1.2218)
+ICC
+
+ICC_user <- function(nome.modelo) {
+  vc <- VarCorr(nome.modelo) 
+  vc <- print(vc, comp=c("Variance", "Std.Dev"))
+  vc <- as.data.frame(vc)[,c("grp", "vcov")]
+  ICC <- vc[1,2]/sum(vc[,2])
+  return(c(ICC = ICC))
+}
+ICC_user(null)
+
+if(!require("performance")) install.packages("performance")  # instalar o pacote se necessário
+
+icc(null)
+```
+  
+7. Examinar os efeitos fixos de sexo (*sex*; 0=rapaz, 1=rapariga) e experiência do professor (*texp*) sobre popularidade, controlado o impacto da turma no valor médios de popularidade dos alunos. Se considerar útil, poderá centrar as variáveis preditivas. Reportar os valores de R2 e *p* utilizando o ajustamento de Satterthwaite.  
+```{r}
+DF_POPULAR$texp.c <- scale(DF_POPULAR$texp, scale = FALSE)[,] 
+head(DF_POPULAR)
+
+model2 <- lmer(popular ~ sex + texp.c + (1 | class), data=DF_POPULAR)
+summary(model2)
+
+if(!require("MuMIn")) install.packages("MuMIn")  # instalar o pacote se necessário
+?r.squaredGLMM
+r.squaredGLMM(model2)
+
+if(!require("lmerTest")) install.packages("lmerTest")  # instalar o pacote se necessário
+model2 <- lmer(popular ~ sex + texp.c + (1 | class), data=DF_POPULAR)
+summary(model2, ddf = "Satterthwaite")
+```
+
+8. Adicionar ao modelo anterior o efeito fixo de extroversão no nível 1 (*extrav*). Compare este modelo com o modelo anterior e interprete os resultados.
+```{r}
+DF_POPULAR$extrav.c <- scale(DF_POPULAR$extrav, scale = FALSE)[,] 
+model3 <- lmer(popular ~ sex + texp.c + extrav.c + (1 | class), data=DF_POPULAR)
+summary(model3)
+r.squaredGLMM(model3)
+anova(model2, model3)
+
+if(!require("effectsize")) install.packages("effectsize")  # instalar o pacote se necessário
+standardize_parameters(model3, method = "refit")
+```
+  
+9. Incluir os random effects das variáveis de nível 1. O que sugerem estes novos resultados? 
+```{r}
+model4 <- lmer(popular ~ 1 + sex + extrav.c + texp.c + (1 + sex + extrav.c | class), REML=FALSE, data = DF_POPULAR)
+summary(model4)
+r.squaredGLMM(model4)
+anova(model3, model4)
+```
+
+10. Recorrer à função lmerTest::ranova() para perceber se faz sentido conduzir alguma re-especificação do modelo anterior. Se sim, testar o novo modelo e comparar com o modelo anterior. O que se pode concluir?
+```{r}
+ranova(model4)
+model5 <- lmer(popular ~ 1 + sex + extrav + texp + (1 + extrav | class), data = DF_POPULAR)
+summary(model5)
+r.squaredGLMM(model5)
+anova(model4, model5)
+```
