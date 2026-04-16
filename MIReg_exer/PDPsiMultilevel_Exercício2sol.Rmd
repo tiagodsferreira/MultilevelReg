@@ -1,7 +1,6 @@
 ---
 title: "Modelos de Regressão Multinível: Laboratório"
-author: "Joana Cadima & Tiago Ferreira"
-date: "Maio, 2022"
+author: "Tiago Ferreira"
 output:
   html_document:
     code_folding: hide
@@ -27,11 +26,11 @@ A base de dados "popular" foi retirada do livro *Multilevel Analysis Techniques 
 1. Importar para o R a base de dados (BD) do ficheiro spss (.sav) ou texto (.csv). Para importar do spss recorra à função foreign::read.spss.  
 ```{r}
 if(!require("foreign")) install.packages("foreign")  # instalar o pacote se necessário
-DF_POPULAR <- read.spss("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\popular.sav", to.data.frame = TRUE)
+DF_POPULAR <- read.spss("G:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\MLReg_data\\popular.sav", to.data.frame = TRUE)
 
 DF_POPULAR <-
   read.csv2(
-    "G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\popular.csv",
+    "G:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\MLReg_data\\popular.csv",
     fileEncoding="UTF-8-BOM")
 
 ```

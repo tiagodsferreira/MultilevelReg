@@ -1,7 +1,6 @@
 ---
 title: "Analises Multinível - Laboratório (Parte 3)"
-author: "Joana Cadima & Tiago Ferreira"
-date: "Maio 15, 2020"
+author: "Tiago Ferreira"
 output:
   html_document:
     toc: true
@@ -44,7 +43,7 @@ Laboratório (Parte 2) | Breve introdução ao R:
 O seguinte código serve apenas para demonstrar como foi criada a base de dados que será utilizada ao longo deste tutorial. Se desejar apenas importar a base de dados poderá simplesmente correr o código para importação de ficheiro csv que está disponível logo no início do ponto 1, *Importar e Explorar a base de dados*.
 
 
-```{r}
+```{r, eval=FALSE}
 set.seed(42) # para permitir reproduzir a mesma sequência de números aleatórios
 nrich <- 40 # número de sujeitos  por escola ricas 
 npoor <- 160 # número de sujeitos  por escola pobres
@@ -133,7 +132,9 @@ All.Schools.Data$SchoolContext[All.Schools.Data$SchoolID<4] <- "rich neighborhoo
 All.Schools.Data$SchoolContext <- as.factor(All.Schools.Data$SchoolContext)
 
 # Guarda base de dados em ficheiro csv (SchoolsData.csv)
-write.csv(All.Schools.Data, "C:\\Users\\tiago\\Google Drive\\FPCEUP\\R trainning\\PDPsi\\PDPsi_Multilevel\\DATA_Multilevel\\SchoolsData.csv", row.names=FALSE)
+write.csv(All.Schools.Data, "I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\MLReg_data\\SchoolsData.csv", row.names=FALSE)
+
+
 ```
 
 
@@ -142,7 +143,7 @@ write.csv(All.Schools.Data, "C:\\Users\\tiago\\Google Drive\\FPCEUP\\R trainning
 Em vez de criar a base de dados do zero com o código anterior, poderá simplesmente importá-la do ficheiro csv disponibilizado no materiais de curso utilizando o código seguinte.   
 ```{r}
 library(data.table)  # se necessário: install.packages("data.table")
-SchoolsData <- fread("C:\\Users\\tiago\\Google Drive\\FPCEUP\\R trainning\\PDPsi\\PDPsi_Multilevel\\DATA_Multilevel\\SchoolsData.csv")
+SchoolsData <- fread("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\MLReg_data\\SchoolsData.csv")
 ```
 
 A base de dados "SchoolsData" é composta por 600 alunos inseridos em 6 escolas, 3 em contextos economicamente favorecidos e 3 em contextos economicamente desfavorecidos. A variável em estudo é o nível de felicidade ("Happiness") reportado por cada um dos alunos. Pretendemos explicar "Happiness" (variável dependente) em função do número de amigos ("Friends"), qualidade da escola percecionada por cada um dos alunos ("Quality") e aproveito académico ("GPA"). Começamos por usar algumas funções já conhecidas para perceber a estrutura geral da base de dados.

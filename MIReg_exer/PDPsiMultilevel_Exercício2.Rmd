@@ -1,7 +1,6 @@
 ---
 title: "Modelos de Regressão Multinível: Laboratório"
-author: "Joana Cadima & Tiago Ferreira"
-date: "Maio, 2022"
+author: "Tiago Ferreira"
 output:
   html_document:
     code_folding: hide

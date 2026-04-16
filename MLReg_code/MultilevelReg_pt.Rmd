@@ -1,7 +1,6 @@
 ---
-title: "Modelos de Regressão Multinível: Laboratório"
-author: "Joana Cadima & Tiago Ferreira"
-date: "Maio, 2022"
+title: "Data Management and Exploratory Data Analysis in R"
+author: "Patrício Costa & Tiago Ferreira"
 output:
   ioslides_presentation: 
     widescreen: true
@@ -9,12 +8,6 @@ output:
   slidy_presentation: default
 ---
 
-<style>
-pre {
-    line-height: 1.2em;
-    font-size: 16px;
-}
-</style>
 
 ```{r, setup, include=FALSE}
 library("datasets")  
@@ -308,7 +301,9 @@ $$
     - qualidade da escola percecionada individualmente ("Quality") [0-6]         
     
 ```{r}
-SchoolsData <- read.csv("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MultilevelReg\\MLReg_data\\SchoolsData.csv")
+SchoolsData <- read.csv("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\MLReg_data\\SchoolsData.csv")
+
+
 ```
 
 NOTA: na base de dados as primeiras 10 escolas são de contextos normativos; a restantes estão localizadas em contextos desfavorecidos
@@ -629,7 +624,8 @@ LEGENDA:
 $${y_{i}} = \beta_{0} + \beta_{1}x_{i} + \varepsilon_{i}$$
 
 ```{r, out.width = "450px", echo = FALSE}
-knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\1_singlelevel.JPG")
+knitr::include_graphics("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\figures\\1_singlelevel.JPG")
+
 ```
 
 
@@ -674,7 +670,7 @@ $\varepsilon_{ij}$ = resíduo aleatório associado aos score do indivíduo *i* (
 ## Modelo nulo - decomposição da variância  
 $${y_{ij}} = \gamma_{00} + U_{0j} + \varepsilon_{ij}$$
 ```{r, out.width = "500px", echo = FALSE}
-knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\nullmodel.JPG")
+knitr::include_graphics("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\figures\\nullmodel.JPG")
 ```
 
 
@@ -816,7 +812,7 @@ LEGENDA: $\rho$ = ICC; $nc$ = tamanho médio do cluster;
 ## Random Intercept Model com preditor de nível 1   
 $$y_{i} = \gamma_{00} + \beta_{1j}x + U_{0j} + \varepsilon_{i}$$
 ```{r, out.width = "500px", echo = FALSE}
-knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\2_randointercept.JPG")
+knitr::include_graphics("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\figures\\2_randointercept.JPG")
 ```
 
 
@@ -1038,7 +1034,7 @@ $\varepsilon_{ij}$ = resíduo aleatório associado aos score do indivíduo *i* (
 ## Random Intercept and slope Model  
 $$y_{ij} = \gamma_{00} + \gamma_{10}x_{ij} + U_{0j} + U_{1j}x_{ij} + \varepsilon_{ij}$$
 ```{r, out.width = "500px", echo = FALSE}
-knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\3_randointerceptslope.JPG")
+knitr::include_graphics("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\figures\\3_randointerceptslope.JPG")
 ```
 
 
@@ -1161,7 +1157,7 @@ probe_interaction(Model.8, Friends.C, SchoolContext)$interactplot
 
 
 ```{r, out.width = "200px", echo = FALSE}
-knitr::include_graphics("G:\\My Drive\\FPCEUP\\R trainning\\GitRepo\\Multilevel Regression\\MLReg_figures\\Multilevel_Hox.jpg")
+knitr::include_graphics("I:\\My Drive\\FPCEUP\\AtividadeDocente\\MultilevelReg\\figures\\Multilevel_Hox.jpg")
 ```
 
 
